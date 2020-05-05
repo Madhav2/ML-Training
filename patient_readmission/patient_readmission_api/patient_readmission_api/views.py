@@ -1,10 +1,10 @@
-from django.http.response import (JsonResponse)
+from django.http.response import (JsonResponse, HttpResponse)
 from rest_framework.views import APIView
 import json
 import pandas as pd
 import numpy as np
 import pickle
-import ipdb
+from .settings import BASE_DIR
 
 
 class PatientReadmission(APIView):
@@ -35,10 +35,10 @@ class PatientReadmission(APIView):
                     'metformin.pioglitazone', 'Target', 'istrain']
 
     def post(self, request):
-        request = json.dumps(request.data)
-        data = pd.DataFrame(json.loads(request))
+        data = pd.DataFrame(request.data)
         data = self.preprocess(data)
-        model = pickle.load(open(r"E:\Data Science\Ggk assignments\patient_readmission_model", 'rb'))
+        model = pickle.load(open(BASE_DIR + r"\patient_readmission_api\prediction_models\patient_readmission_model",
+                                 'rb'))
         predicted = model.predict_proba(data)
         return JsonResponse(status=200, data={'classes': model.classes_.tolist(),
                                               'predictions': predicted.tolist()})
